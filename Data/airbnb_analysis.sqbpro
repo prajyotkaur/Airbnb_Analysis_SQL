@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="/Users/prajyotkaur/airbnb_analysis.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="1862"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><current_table name="4,14:mainclean_listings"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="clean_listings" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_"><sort/><column_widths><column index="1" value="55"/><column index="2" value="300"/><column index="3" value="70"/><column index="4" value="183"/><column index="5" value="122"/><column index="6" value="136"/><column index="7" value="110"/><column index="8" value="135"/><column index="9" value="87"/><column index="10" value="39"/><column index="11" value="94"/><column index="12" value="113"/><column index="13" value="73"/><column index="14" value="112"/><column index="15" value="170"/><column index="16" value="92"/><column index="17" value="136"/><column index="18" value="45"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="create_table.sql">CREATE TABLE listings (
+    id TEXT,
+    name TEXT,
+    host_id TEXT,
+    host_name TEXT,
+    neighbourhood_group TEXT,
+    neighbourhood TEXT,
+    latitude TEXT,
+    longitude TEXT,
+    room_type TEXT,
+    price TEXT,
+    minimum_nights TEXT,
+    number_of_reviews TEXT,
+    last_review TEXT,
+    reviews_per_month TEXT,
+    calculated_host_listings_count TEXT,
+    availability_365 TEXT,
+    number_of_reviews_ltm TEXT,
+    license TEXT
+);
+
+
+CREATE TABLE clean_listings AS
+SELECT
+    CAST(id AS INTEGER) AS id,
+    name,
+    CAST(host_id AS INTEGER) AS host_id,
+    host_name,
+    neighbourhood_group,
+    neighbourhood,
+    CAST(latitude AS REAL) AS latitude,
+    CAST(longitude AS REAL) AS longitude,
+    room_type,
+    CAST(price AS INTEGER) AS price,
+    CAST(minimum_nights AS INTEGER) AS minimum_nights,
+    CAST(number_of_reviews AS INTEGER) AS number_of_reviews,
+    last_review,
+    CAST(reviews_per_month AS REAL) AS reviews_per_month,
+    CAST(calculated_host_listings_count AS INTEGER) AS calculated_host_listings_count,
+    CAST(availability_365 AS INTEGER) AS availability_365,
+    CAST(number_of_reviews_ltm AS INTEGER) AS number_of_reviews_ltm,
+    license
+FROM listings;</sql><sql name="UnderstandingDataQueries">-- 1. Preview Dataset
+SELECT * FROM clean_listings LIMIT 5;
+
+-- 2. Top 10 Neighbourhoods by listings
+SELECT neighbourhood, count(*) as listing_count
+from clean_listings
+GROUP by neighbourhood
+ORDER by listing_count DESC
+LIMIT 10;
+
+-- 3. Average price by room type
+SELECT room_type, ROUND(AVG(price), 2) AS avg_price
+FROM clean_listings
+GROUP BY room_type
+ORDER BY avg_price DESC;
+
+-- 4. Listings available all year
+SELECT COUNT(*) AS always_available
+FROM listings
+WHERE availability_365 = 365;
+
+-- 5. Most Reviewed listings
+SELECT name, number_of_reviews
+FROM listings
+ORDER BY number_of_reviews DESC
+LIMIT 5;
+
+-- 6. Avg Minimum Nights by Neighbourhood Group
+SELECT neighbourhood_group, ROUND(AVG(minimum_nights), 2) AS avg_min_nights
+FROM listings
+GROUP BY neighbourhood_group;
+</sql><sql name="IntermediateAnalysis_Query7to13.sql">-- 7. Top 10 hosts by listings
+SELECT host_id, host_name, COUNT(*) AS total_listings
+FROM listings
+GROUP BY host_id, host_name
+ORDER BY total_listings DESC
+LIMIT 10;
+
+-- 8. Most Expensive Neighbourhoods
+SELECT neighbourhood, ROUND(AVG(price), 2) AS avg_price
+FROM listings
+GROUP BY neighbourhood
+ORDER BY avg_price DESC
+LIMIT 10;
+
+-- 9. Neighbourhood wise Room type distribution
+SELECT 
+  neighbourhood,
+  COUNT(CASE WHEN room_type = 'Entire home/apt' THEN 1 END) AS entire_home,
+  COUNT(CASE WHEN room_type = 'Private room' THEN 1 END) AS private_room,
+  COUNT(CASE WHEN room_type = 'Shared room' THEN 1 END) AS shared_room
+FROM listings
+GROUP BY neighbourhood
+ORDER BY entire_home DESC;
+
+--10. Neighbourhoods with listings above City Average
+WITH avg_price_london AS (
+  SELECT AVG(price) AS city_avg FROM clean_listings
+)
+SELECT l.neighbourhood, ROUND(AVG(l.price), 2) AS neighbourhood_avg
+FROM clean_listings l, avg_price_london a
+GROUP BY l.neighbourhood
+HAVING AVG(l.price) &gt; a.city_avg
+ORDER BY neighbourhood_avg DESC;
+
+-- 11. Top 5 Listings per neighbourhood_group by Reviews
+Select * from (
+
+	select id, name, neighbourhood_group, number_of_reviews,
+	rank() over( partition by neighbourhood_group order by number_of_reviews DESC) as rank
+	from clean_listings
+	) ranked_listings
+where rank&lt;=5;
+
+-- 12. Most Active hosts with average reviews 
+SELECT host_id, host_name,
+       COUNT(id) AS total_listings,
+       ROUND(AVG(number_of_reviews), 2) AS avg_reviews
+FROM clean_listings
+GROUP BY host_id, host_name
+HAVING COUNT(id) &gt; 5
+ORDER BY avg_reviews DESC
+LIMIT 10;
+
+-- 13.  Calculate Total Monthly Revenue Potential
+
+with Monthly_Revenue as (
+	select id, neighbourhood, price, availability_365,
+	round((price * (availability_365/30)), 2) as estimated_mthly_revenue
+	from clean_listings
+	where availability_365&gt;0
+)
+select neighbourhood, round(avg(estimated_mthly_revenue),2) as avg_mthly_revenue
+from Monthly_Revenue
+group by neighbourhood
+order by avg_mthly_revenue desc
+limit 10;
+</sql><current_tab id="2"/></tab_sql></sqlb_project>

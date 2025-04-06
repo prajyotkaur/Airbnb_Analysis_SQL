@@ -1,0 +1,6 @@
+id,name,host_id,host_name,neighbourhood_group,neighbourhood,latitude,longitude,room_type,price,minimum_nights,number_of_reviews,last_review,reviews_per_month,calculated_host_listings_count,availability_365,number_of_reviews_ltm,license
+0,name,0,host_name,neighbourhood_group,neighbourhood,0.0,0.0,room_type,0,0,0,last_review,0.0,0,0,0,license
+13913,Holiday London DB Room Let-on going,54730,Alina,,Islington,51.56861,-0.1127,Private room,59,1,47,2024-11-17,0.27,3,344,6,
+15400,Bright Chelsea  Apartment. Chelsea!,60302,Philippa,,Kensington and Chelsea,51.48811,-0.16878,Entire home/apt,120,4,96,2024-04-28,0.53,1,85,2,
+17402,Very Central Modern 3-Bed/2 Bath By Oxford St W1,67564,Liz,,Westminster,51.52195,-0.14094,Entire home/apt,501,3,56,2024-02-19,0.33,6,297,1,
+24328,Battersea live/work artist house,41759,Joe,,Wandsworth,51.47072,-0.16266,Entire home/apt,225,2,94,2022-07-19,0.55,1,284,0,
