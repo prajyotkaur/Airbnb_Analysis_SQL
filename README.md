@@ -1,8 +1,8 @@
 # 🏡 Airbnb SQL Analysis - London Listings + Tableau Dashboard
 
 ## 📌 Objective
-Explore and analyze Airbnb listings in London using advanced SQL queries and visualize insights through an interactive Tableau dashboard.
-
+An end-to-end data case study using SQL and Tableau Public.  
+We analyzed London Airbnb listings to uncover insights like top neighbourhoods, pricing trends, availability, and host performance.
 ---
 
 ## 📊 Dataset
